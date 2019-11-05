@@ -18,7 +18,7 @@ Android 第一行代码（第二版）的实战项目
 
    模拟器能够跑起来，URL这些是没有问题的。
 
-   手机使用的Android 9.0 应该需要在某处设置一些参数。(未解决)
+   手机使用的Android 9.0 应该需要在某处设置一些参数。(已解决)
 
    ```java
    private void queryCounties(){
@@ -86,6 +86,29 @@ Android 第一行代码（第二版）的实战项目
    
    ```
 
-   
+   - ##### 问题原因：
+
+   应用官方的说明:在 Android 6.0 中，我们取消了对 Apache HTTP 客户端的支持。 从 Android 9 开始，默认情况下该内容库已从 bootclasspath 中移除且不可用于应用。且Android P 限制了明文流量的网络请求，非加密的流量请求都会被系统禁止掉。
+
+   ##### 解决办法:
+
+    在res目录下新建xml文件夹,文件夹中新建文件network_security_config.xml,文件内容如下 
+
+   ```xml
+   <network-security-config>
+       <base-config cleartextTrafficPermitted="true" />
+   </network-security-config>
+   ```
+
+    在AndroidManifest.xml文件中,Application标签下添加如下属性: 
+
+   ```xml
+   android:networkSecurityConfig="@xml/network_security_config"
+   ```
+
+   ————————————————
+
+   方法来源：https://blog.csdn.net/code_hero666/article/details/89478122
 
 3. 每次下拉刷新，数据变动（理应不变）。(未解决)
+

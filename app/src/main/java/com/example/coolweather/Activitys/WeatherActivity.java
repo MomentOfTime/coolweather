@@ -298,7 +298,7 @@ public class WeatherActivity extends AppCompatActivity {
 
 
         String cityName = weather.basic.cityName;
-        String updateTime = weather.basic.update.updateTime.split("")[1];
+        String updateTime = weather.basic.update.updateTime.split(" ")[1];
         String degree = weather.now.temperature + "°C";
         String weatherInfo = weather.now.more.info;
         titleCity.setText(cityName);
