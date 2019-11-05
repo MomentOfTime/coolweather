@@ -1,6 +1,7 @@
 package com.example.coolweather;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.coolweather.Activitys.WeatherActivity;
 import com.example.coolweather.db.City;
 import com.example.coolweather.db.County;
 import com.example.coolweather.db.Province;
@@ -106,6 +108,12 @@ public class ChooseAreaFragment extends Fragment {
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(i);
                     queryCounties();
+                }else if (currentLevel == LEVEL_COUNTY) {
+                    String weatherId = countyList.get(i).getWeatherId();
+                    Intent intent = new Intent(getActivity() , WeatherActivity.class);
+                    intent.putExtra("weather_id" , weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -146,18 +154,30 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCities(){
         titleText.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
-        cityList = DataSupport.where("provinceid = ?",String.valueOf(selectedProvince.getId())).find(City.class);
+        cityList = DataSupport.where("provinceCode = ?",String.valueOf(selectedProvince.getId())).find(City.class);
         if (cityList.size() > 0){
-            dataList.clear();
-            for (City city : cityList){
-                dataList.add(city.getCityName());
+            try {
+                dataList.clear();
+                for (City city : cityList){
+                    dataList.add(city.getCityName());
+                }
+                adapter.notifyDataSetChanged();
+                listView.setSelection(0);
+                currentLevel = LEVEL_CITY;
+                /**
+                 * 优化部分逻辑，增加数据完整性判断
+                 */
+            }catch (NullPointerException e){
+                String url ="http://guolin.tech/api/china";
+                queryFromServer(url,"province");
+                int provinceCode = selectedProvince.getProvinceCode();
+                url = url + provinceCode;
+                queryFromServer(url , "city");
             }
-            adapter.notifyDataSetChanged();
-            listView.setSelection(0);
-            currentLevel = LEVEL_CITY;
+
         }else{
             int provinceCode = selectedProvince.getProvinceCode();
-            String address = "http://guolin/tech/api/china/"+provinceCode;
+            String address = "http://guolin.tech/api/china/"+provinceCode;
             queryFromServer(address,"city");
         }
     }
@@ -177,7 +197,7 @@ public class ChooseAreaFragment extends Fragment {
         }else{
             int provinceCode = selectedProvince.getProvinceCode();
             int cityCode = selectedCity.getCityCode();
-            String address = "http://guolin/tech/api/china/"+provinceCode + "/" + cityCode;
+            String address = "http://guolin.tech/api/china/"+provinceCode + "/" + cityCode;
             queryFromServer(address,"county");
         }
     }
@@ -190,6 +210,8 @@ public class ChooseAreaFragment extends Fragment {
     private void queryFromServer(String address , final String type){
         showProgressDialog();
         HttpUtil.sendOkHttpRequest(address, new Callback() {
+
+
             @Override
             public void onFailure(Call call, IOException e) {
                 //通过runOnUiThread() 方法回到主线程
