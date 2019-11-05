@@ -5,6 +5,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -24,6 +25,7 @@ import com.example.coolweather.R;
 import com.example.coolweather.db.County;
 import com.example.coolweather.gson.Forecast;
 import com.example.coolweather.gson.Weather;
+import com.example.coolweather.service.AutoUpdateService;
 import com.example.coolweather.util.HttpUtil;
 import com.example.coolweather.util.Utility;
 
@@ -293,6 +295,8 @@ public class WeatherActivity extends AppCompatActivity {
      * @param weather
      */
     private void showWeatherInfo (Weather weather) {
+
+
         String cityName = weather.basic.cityName;
         String updateTime = weather.basic.update.updateTime.split("")[1];
         String degree = weather.now.temperature + "°C";
@@ -334,6 +338,9 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText.setText(carWash);
         sportText.setText(sport);
         weatherLayout.setVisibility(View.VISIBLE);
-    }
 
+        //启动自动更新服务 后台服务
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
+    }
 }
